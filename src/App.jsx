@@ -6,7 +6,8 @@ import MovieCard from "./components/MovieCard.jsx";
 
 import { getTrendingMovies, updateSearchCount } from "./appwrite.js";
 
-const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const API_KEY = import.meta.env.VITE_TMDB_API;
+
 console.log("API KEY:", API_KEY); // Remove this after debugging
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -119,7 +120,7 @@ const App = () => {
         </header>
 
         {trendingMovies.length > 0 && (
-          <section className="trending">
+          <section className="c">
             <h2>Trending Movies</h2>
 
             <ul>
