@@ -124,6 +124,10 @@ const App = () => {
     return user ? children : <Navigate to="/login" replace />;
   };
 
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+  };
+
   return (
     <Routes>
       <Route index element={<Navigate to="/login" replace />} />
@@ -185,7 +189,7 @@ const App = () => {
                   </h1>
                   <Search
                     searchTerm={searchTerm}
-                    setSearchTerm={setSearchTerm}
+                    setSearchTerm={handleSearch}
                   />
                 </header>
 

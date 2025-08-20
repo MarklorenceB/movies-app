@@ -1,66 +1,52 @@
 import { Client, Databases, ID, Query } from "appwrite";
 
-// 🔑 Load from environment
 const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
 const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
 const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
 
-// ⚡ Initialize Appwrite client
 const client = new Client()
-  .setEndpoint(import.meta.env.VITE_APPWRITE_ENDPOINT) // ✅ use env var, not hardcoded
+  .setEndpoint("https://fra.cloud.appwrite.io/v1")
   .setProject(PROJECT_ID);
 
 const database = new Databases(client);
 
-/**
- * ✅ Save search term + update count if already exists
- */
 export const updateSearchCount = async (searchTerm, movie) => {
+  // 1. Use Appwrite SDK to check if the search term exists in the database
   try {
-    // 1. Check if searchTerm already exists
     const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
       Query.equal("searchTerm", searchTerm),
-      Query.limit(1),
     ]);
 
+    // 2. If it does, update the count
     if (result.documents.length > 0) {
       const doc = result.documents[0];
 
-      // 2. Update count
       await database.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id, {
-        count: (doc.count ?? 0) + 1,
+        count: doc.count + 1,
       });
+      // 3. If it doesn't, create a new document with the search term and count as 1
     } else {
-      // 3. Create new document
       await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
         searchTerm,
         count: 1,
         movie_id: movie.id,
-        title: movie.title,
-        poster_url: movie.poster_path
-          ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-          : null,
-        searchedAt: new Date().toISOString(),
+        poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
       });
     }
   } catch (error) {
-    console.error("❌ updateSearchCount error:", error);
+    console.error(error);
   }
 };
 
-/**
- * ✅ Fetch top 5 trending movies from Appwrite DB
- */
 export const getTrendingMovies = async () => {
   try {
     const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-      Query.orderDesc("count"),
       Query.limit(5),
+      Query.orderDesc("count"),
     ]);
 
     return result.documents;
   } catch (error) {
-    console.error("❌ getTrendingMovies error:", error);
-    return [];
+    console.error(error);
   }
 };
